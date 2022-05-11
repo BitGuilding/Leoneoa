@@ -99,6 +99,111 @@ BlockDragSurfaceSvg.prototype.createDom = function() {
       this.container_);
   this.dragGroup_ = dom.createSvgElement(Svg.G, {}, this.SVG_);
 };
+/**
+ * Set the SVG blocks on the drag surface's group and show the surface.
+ * Only one block group should be on the drag surface at a time.
+ * @param {!SVGElement} blocks Block or group of blocks to place on the drag
+ * surface.
+ */
+BlockDragSurfaceSvg.prototype.setBlocksAndShow = function(blocks) {
+  if (this.dragGroup_.childNodes.length) {
+    throw Error('Already dragging a block.');
+  }
+  // appendChild removes the blocks from the previous parent
+  this.dragGroup_.appendChild(blocks);
+  this.SVG_.style.display = 'block';
+  this.surfaceXY_ = new Coordinate(0, 0);
+};
+
+/**
+ * Translate and scale the entire drag surface group to the given position, to
+ * keep in sync with the workspace.
+ * @param {number} x X translation in pixel coordinates.
+ * @param {number} y Y translation in pixel coordinates.
+ * @param {number} scale Scale of the group.
+ */
+BlockDragSurfaceSvg.prototype.translateAndScaleGroup = function(x, y, scale) {
+  this.scale_ = scale;
+  // This is a work-around to prevent a the blocks from rendering
+  // fuzzy while they are being dragged on the drag surface.
+  const fixedX = x.toFixed(0);
+  const fixedY = y.toFixed(0);
+
+  this.childSurfaceXY_.x = parseInt(fixedX, 10);
+  this.childSurfaceXY_.y = parseInt(fixedY, 10);
+
+  this.dragGroup_.setAttribute(
+      'transform',
+      'translate(' + fixedX + ',' + fixedY + ') scale(' + scale + ')');
+};
+
+/**
+ * Translate the drag surface's SVG based on its internal state.
+ * @private
+ */
+BlockDragSurfaceSvg.prototype.translateSurfaceInternal_ = function() {
+  let x = this.surfaceXY_.x;
+  let y = this.surfaceXY_.y;
+  // This is a work-around to prevent a the blocks from rendering
+  // fuzzy while they are being dragged on the drag surface.
+  x = x.toFixed(0);
+  y = y.toFixed(0);
+  this.SVG_.style.display = 'block';
+
+  dom.setCssTransform(this.SVG_, 'translate3d(' + x + 'px, ' + y + 'px, 0)');
+};
+
+/**
+ * Translates the entire surface by a relative offset.
+ * @param {number} deltaX Horizontal offset in pixel units.
+ * @param {number} deltaY Vertical offset in pixel units.
+ */
+BlockDragSurfaceSvg.prototype.translateBy = function(deltaX, deltaY) {
+  const x = this.surfaceXY_.x + deltaX;
+  const y = this.surfaceXY_.y + deltaY;
+  this.surfaceXY_ = new Coordinate(x, y);
+  this.translateSurfaceInternal_();
+};
+
+/**
+ * Translate the entire drag surface during a drag.
+ * We translate the drag surface instead of the blocks inside the surface
+ * so that the browser avoids repainting the SVG.
+ * Because of this, the drag coordinates must be adjusted by scale.
+ * @param {number} x X translation for the entire surface.
+ * @param {number} y Y translation for the entire surface.
+ */
+BlockDragSurfaceSvg.prototype.translateSurface = function(x, y) {
+  this.surfaceXY_ = new Coordinate(x * this.scale_, y * this.scale_);
+  this.translateSurfaceInternal_();
+};
+
+/**
+ * Reports the surface translation in scaled workspace coordinates.
+ * Use this when finishing a drag to return blocks to the correct position.
+ * @return {!Coordinate} Current translation of the surface.
+ */
+BlockDragSurfaceSvg.prototype.getSurfaceTranslation = function() {
+  const xy = svgMath.getRelativeXY(/** @type {!SVGElement} */ (this.SVG_));
+  return new Coordinate(xy.x / this.scale_, xy.y / this.scale_);
+};
+
+/**
+ * Provide a reference to the drag group (primarily for
+ * BlockSvg.getRelativeToSurfaceXY).
+ * @return {?SVGElement} Drag surface group element.
+ */
+BlockDragSurfaceSvg.prototype.getGroup = function() {
+  return this.dragGroup_;
+};
+
+/**
+ * Returns the SVG drag surface.
+ * @returns {?SVGElement} The SVG drag surface.
+ */
+BlockDragSurfaceSvg.prototype.getSvgRoot = function() {
+  return this.SVG_;
+};
 
 
 exports.BlockDragSurfaceSvg = BlockDragSurfaceSvg;
