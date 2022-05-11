@@ -205,5 +205,49 @@ BlockDragSurfaceSvg.prototype.getSvgRoot = function() {
   return this.SVG_;
 };
 
+/**
+ * Get the current blocks on the drag surface, if any (primarily
+ * for BlockSvg.getRelativeToSurfaceXY).
+ * @return {?Element} Drag surface block DOM element, or null if no blocks
+ *     exist.
+ */
+BlockDragSurfaceSvg.prototype.getCurrentBlock = function() {
+  return /** @type {Element} */ (this.dragGroup_.firstChild);
+};
+
+/**
+ * Gets the translation of the child block surface
+ * This surface is in charge of keeping track of how much the workspace has
+ * moved.
+ * @return {!Coordinate} The amount the workspace has been moved.
+ */
+BlockDragSurfaceSvg.prototype.getWsTranslation = function() {
+  // Returning a copy so the coordinate can not be changed outside this class.
+  return this.childSurfaceXY_.clone();
+};
+
+/**
+ * Clear the group and hide the surface; move the blocks off onto the provided
+ * element.
+ * If the block is being deleted it doesn't need to go back to the original
+ * surface, since it would be removed immediately during dispose.
+ * @param {Element=} opt_newSurface Surface the dragging blocks should be moved
+ *     to, or null if the blocks should be removed from this surface without
+ *     being moved to a different surface.
+ */
+BlockDragSurfaceSvg.prototype.clearAndHide = function(opt_newSurface) {
+  if (opt_newSurface) {
+    // appendChild removes the node from this.dragGroup_
+    opt_newSurface.appendChild(this.getCurrentBlock());
+  } else {
+    this.dragGroup_.removeChild(this.getCurrentBlock());
+  }
+  this.SVG_.style.display = 'none';
+  if (this.dragGroup_.childNodes.length) {
+    throw Error('Drag group was not cleared.');
+  }
+  this.surfaceXY_ = null;
+};
+
 
 exports.BlockDragSurfaceSvg = BlockDragSurfaceSvg;
