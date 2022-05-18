@@ -271,8 +271,10 @@ class ConnectionChecker {
       return false;
     }
 
-    
-    
+    if (!b.targetConnection) {
+      return true;
+    }
+   
     return !targetBlock.getPreviousBlock();
   }
 }
