@@ -274,7 +274,13 @@ class ConnectionChecker {
     if (!b.targetConnection) {
       return true;
     }
-   
+    
+    const targetBlock = b.targetBlock();
+    
+    if (!targetBlock.isInsertionMarker()) {
+      return false;
+    }
+    
     return !targetBlock.getPreviousBlock();
   }
 }
