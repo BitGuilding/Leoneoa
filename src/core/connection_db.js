@@ -209,6 +209,84 @@ class ConnectionDB {
 
     return neighbours;
   }
+  
+  /**
+   * Is the candidate connection close to the reference connection.
+   * Extremely fast; only looks at Y distance.
+   * @param {number} index Index in database of candidate connection.
+   * @param {number} baseY Reference connection's Y value.
+   * @param {number} maxRadius The maximum radius to another connection.
+   * @return {boolean} True if connection is in range.
+   * @private
+   */
+  isInYRange_(index, baseY, maxRadius) {
+    return (Math.abs(this.connections_[index].y - baseY) <= maxRadius);
+  }
+
+  /**
+   * Find the closest compatible connection to this connection.
+   * @param {!RenderedConnection} conn The connection searching for a compatible
+   *     mate.
+   * @param {number} maxRadius The maximum radius to another connection.
+   * @param {!Coordinate} dxy Offset between this connection's
+   *     location in the database and the current location (as a result of
+   *     dragging).
+   * @return {!{connection: RenderedConnection, radius: number}}
+   *     Contains two properties: 'connection' which is either another
+   *     connection or null, and 'radius' which is the distance.
+   */
+  searchForClosest(conn, maxRadius, dxy) {
+    if (!this.connections_.length) {
+      // Don't bother.
+      return {connection: null, radius: maxRadius};
+    }
+
+    // Stash the values of x and y from before the drag.
+    const baseY = conn.y;
+    const baseX = conn.x;
+
+    conn.x = baseX + dxy.x;
+    conn.y = baseY + dxy.y;
+
+    // calculateIndexForYPos_ finds an index for insertion, which is always
+    // after any block with the same y index.  We want to search both forward
+    // and back, so search on both sides of the index.
+    const closestIndex = this.calculateIndexForYPos_(conn.y);
+
+    let bestConnection = null;
+    let bestRadius = maxRadius;
+    let temp;
+
+    // Walk forward and back on the y axis looking for the closest x,y point.
+    let pointerMin = closestIndex - 1;
+    while (pointerMin >= 0 && this.isInYRange_(pointerMin, conn.y, maxRadius)) {
+      temp = this.connections_[pointerMin];
+      if (this.connectionChecker_.canConnect(conn, temp, true, bestRadius)) {
+        bestConnection = temp;
+        bestRadius = temp.distanceFrom(conn);
+      }
+      pointerMin--;
+    }
+
+    let pointerMax = closestIndex;
+    while (pointerMax < this.connections_.length &&
+           this.isInYRange_(pointerMax, conn.y, maxRadius)) {
+      temp = this.connections_[pointerMax];
+      if (this.connectionChecker_.canConnect(conn, temp, true, bestRadius)) {
+        bestConnection = temp;
+        bestRadius = temp.distanceFrom(conn);
+      }
+      pointerMax++;
+    }
+
+    // Reset the values of x and y.
+    conn.x = baseX;
+    conn.y = baseY;
+
+    // If there were no valid connections, bestConnection will be null.
+    return {connection: bestConnection, radius: bestRadius};
+  }
+
 }
 
 exports.ConnectionDB = ConnectionDB;
