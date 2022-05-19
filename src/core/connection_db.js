@@ -287,6 +287,23 @@ class ConnectionDB {
     return {connection: bestConnection, radius: bestRadius};
   }
 
+  /**
+   * Initialize a set of connection DBs for a workspace.
+   * @param {!IConnectionChecker} checker The workspace's
+   *     connection checker, used to decide if connections are valid during a
+   *     drag.
+   * @return {!Array<!ConnectionDB>} Array of databases.
+   */
+  static init(checker) {
+    // Create four databases, one for each connection type.
+    const dbList = [];
+    dbList[ConnectionType.INPUT_VALUE] = new ConnectionDB(checker);
+    dbList[ConnectionType.OUTPUT_VALUE] = new ConnectionDB(checker);
+    dbList[ConnectionType.NEXT_STATEMENT] = new ConnectionDB(checker);
+    dbList[ConnectionType.PREVIOUS_STATEMENT] = new ConnectionDB(checker);
+    return dbList;
+  }
+  
 }
 
 exports.ConnectionDB = ConnectionDB;
