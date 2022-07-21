@@ -62,8 +62,7 @@ const PAGE_MODE_MULTIPLIER = 125;
  * @alias Blockly.browserEvents.conditionalBind
  */
 const conditionalBind = function(
-    node, name, thisObject, func, opt_noCaptureIdentifier,
-    opt_noPreventDefault) {
+    node, name, thisObject, func, opt_noCaptureIdentifier, opt_noPreventDefault) {
   let handled = false;
   const wrapFunc = function(e) {
     const captureIdentifier = !opt_noCaptureIdentifier;
