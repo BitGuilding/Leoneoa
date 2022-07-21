@@ -106,7 +106,11 @@ const conditionalBind = function(
           e.preventDefault();
         }
       };
-      
+      for (let i = 0; i < Touch.TOUCH_MAP[name].length; i++) {
+        const type = Touch.TOUCH_MAP[name][i];
+        node.addEventListener(type, touchWrapFunc, false);
+        bindData.push([node, type, touchWrapFunc]);
+      }
     }
   }
   return bindData;
