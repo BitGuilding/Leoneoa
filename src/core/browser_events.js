@@ -221,6 +221,7 @@ exports.isTargetInput = isTargetInput;
  */
 const isRightButton = function(e) {
   if (e.ctrlKey && userAgent.MAC) {
+      
     // Control-clicking on Mac OS X is treated as a right-click.
     // WebKit on Mac OS X fails to change button to 2 (but Gecko does).
     return true;
