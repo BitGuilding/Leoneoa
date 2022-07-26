@@ -26,7 +26,17 @@ let promptImplementation = function(message, defaultValue, callback) {
   callback(window.prompt(message, defaultValue));
 };
 
-
+/**
+ * Wrapper to window.alert() that app developers may override via setAlert to
+ * provide alternatives to the modal browser window.
+ * @param {string} message The message to display to the user.
+ * @param {function()=} opt_callback The callback when the alert is dismissed.
+ * @alias Blockly.dialog.alert
+ */
+const alert = function(message, opt_callback) {
+  alertImplementation(message, opt_callback);
+};
+exports.alert = alert;
 
 /**
  * Sets the function to be run when Blockly.dialog.alert() is called.
