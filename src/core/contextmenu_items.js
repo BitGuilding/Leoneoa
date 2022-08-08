@@ -77,6 +77,7 @@ const registerRedo = function() {
     scopeType: ContextMenuRegistry.ScopeType.WORKSPACE,
     id: 'redoWorkspace',
     weight: 2,
+    
   };
   ContextMenuRegistry.registry.register(redoOption);
 };
