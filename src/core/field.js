@@ -195,6 +195,13 @@ class Field {
      * @protected
      */
     this.sourceBlock_ = null;
+    
+    /**
+     * Block this field is attached to.  Starts as null, then set in init.
+     * @type {Block2}
+     * @protected
+     */
+    this.sourceBlock2_ = null;
 
     /**
      * Does this block need to be re-rendered?
