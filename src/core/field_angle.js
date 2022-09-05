@@ -168,7 +168,22 @@ class FieldAngle extends FieldTextInput {
     if (typeof clockwise === 'boolean') {
       this.clockwise_ = clockwise;
     }
-
+    
+    /**
+   * Remove a connection from the database.  Must already exist in DB.
+   * @param {!RenderedConnection} connection The connection to be removed.
+   * @param {number} yPos The y position used to find the index of the
+   *     connection.
+   * @throws {Error} If the connection cannot be found in the database.
+   */
+  removeConnection(connection, yPos) {
+    const index = this.findIndexOfConnection_(connection, yPos);
+    if (index === -1) {
+      throw Error('Unable to find connection in connectionDB.');
+    }
+    this.connections_.splice(index, 1);
+  }
+    
     // If these are passed as null then we should leave them on the default.
     let offset = config['offset'];
     if (offset !== null) {
