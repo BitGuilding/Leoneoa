@@ -111,6 +111,22 @@ const connectionUiEffect = function(block) {
 exports.connectionUiEffect = connectionUiEffect;
 
 /**
+ * Translate the drag surface's SVG based on its internal state.
+ * @private
+ */
+BlockDragSurfaceSvg.prototype.translateSurfaceInternal_ = function() {
+  let x = this.surfaceXY_.x;
+  let y = this.surfaceXY_.y;
+  // This is a work-around to prevent a the blocks from rendering
+  // fuzzy while they are being dragged on the drag surface.
+  x = x.toFixed(0);
+  y = y.toFixed(0);
+  this.SVG_.style.display = 'block';
+
+  dom.setCssTransform(this.SVG_, 'translate3d(' + x + 'px, ' + y + 'px, 0)');
+};
+
+/**
  * Expand a ripple around a connection.
  * @param {!SVGElement} ripple Element to animate.
  * @param {!Date} start Date of animation's start.
